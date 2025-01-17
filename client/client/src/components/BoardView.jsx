@@ -15,5 +15,4 @@ const BoardView = ({ tasks }) => {
   );
 };
 
-
 export default BoardView;

@@ -8,10 +8,9 @@ import Button from "./Button";
 
 const AddUser = ({ open, setOpen, userData }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   
-  let defaultValues = userData ?? {};
   const { user } = useSelector((state) => state.auth);
+  let defaultValues = userData ?? {}; // Default to userData for editing or empty object for new user
 
   const {
     register,
@@ -21,22 +20,41 @@ const AddUser = ({ open, setOpen, userData }) => {
 
   const handleOnSubmit = async (data) => {
     setIsLoading(true);
+
+    // If userData exists, we are updating the profile
+    const method = userData ? "PUT" : "POST"; // If userData exists, use PUT to update, else POST to create
+    const url = userData 
+      ? `http://localhost:5000/api/users/${userData._id}` // Update URL with user ID
+      : "http://localhost:5000/api/users"; // For new user creation
+
     try {
-      // Add your submit logic here, e.g., API request to add or update user
-      console.log(data);
-      // Assuming success, set loading to false and close modal
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(userData ? "Error updating user" : "Error creating user");
+      }
+
+      const result = await response.json();
+      console.log(userData ? "User Updated:" : "User Created:", result);
+      
+      // Close the modal after successful submission
       setIsLoading(false);
       setOpen(false);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error submitting form:", error);
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-10">
       <div className="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true"></div>
-      
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
           <form onSubmit={handleSubmit(handleOnSubmit)}>
@@ -109,7 +127,7 @@ const AddUser = ({ open, setOpen, userData }) => {
               />
             </div>
 
-            {isLoading || isUpdating ? (
+            {isLoading ? (
               <div className="py-5">
                 <Loading />
               </div>

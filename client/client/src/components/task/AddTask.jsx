@@ -9,7 +9,7 @@ import { BiImages } from "react-icons/bi";
 import Button from "../Button";
 
 const LISTS = ["TODO", "IN PROGRESS", "COMPLETED"];
-const PRIORIRY = ["HIGH", "MEDIUM", "NORMAL", "LOW"];
+const PRIORITY = ["HIGH", "MEDIUM", "NORMAL", "LOW"];
 
 const AddTask = ({ open, setOpen }) => {
   const task = "";
@@ -22,16 +22,18 @@ const AddTask = ({ open, setOpen }) => {
   const [team, setTeam] = useState(task?.team || []);
   const [stage, setStage] = useState(task?.stage?.toUpperCase() || LISTS[0]);
   const [priority, setPriority] = useState(
-    task?.priority?.toUpperCase() || PRIORIRY[2]
+    task?.priority?.toUpperCase() || PRIORITY[2]
   );
   const [assets, setAssets] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const submitHandler = async (data) => {
     try {
+      setUploading(true); // Indicate assets are being uploaded
       const formData = new FormData();
       formData.append("title", data.title);
-      formData.append("team", JSON.stringify(team));  
+      formData.append("team", JSON.stringify(team));
       formData.append("stage", stage);
       formData.append("priority", priority);
       formData.append("date", data.date);
@@ -47,14 +49,22 @@ const AddTask = ({ open, setOpen }) => {
       });
 
       const result = await response.json();
+      setUploading(false); // Stop the loading state
+
       if (response.ok) {
-        console.log(result.message);
-        setOpen(false); // Close modal on success
+        setSuccessMessage("Task created successfully!");
+        setTimeout(() => {
+          setSuccessMessage("");
+          setOpen(false); // Close modal after success
+        }, 2000); // Close modal after 2 seconds
       } else {
-        console.log(result.message);
+        console.error(result.message);
+        setSuccessMessage("Failed to create task. Please try again.");
       }
     } catch (error) {
+      setUploading(false);
       console.error("Error creating task:", error);
+      setSuccessMessage("An error occurred. Please try again.");
     }
   };
 
@@ -112,7 +122,7 @@ const AddTask = ({ open, setOpen }) => {
             <div className="flex gap-4">
               <SelectList
                 label="Priority Level"
-                lists={PRIORIRY}
+                lists={PRIORITY}
                 selected={priority}
                 setSelected={setPriority}
               />
@@ -139,7 +149,7 @@ const AddTask = ({ open, setOpen }) => {
             <div className="bg-gray-50 py-6 sm:flex sm:flex-row-reverse gap-4">
               {uploading ? (
                 <span className="text-sm py-2 text-red-500">
-                  Uploading assets
+                  Uploading assets...
                 </span>
               ) : (
                 <Button
@@ -156,6 +166,12 @@ const AddTask = ({ open, setOpen }) => {
                 label="Cancel"
               />
             </div>
+
+            {successMessage && (
+              <div className="mt-4 text-center text-sm text-green-500">
+                {successMessage}
+              </div>
+            )}
           </div>
         </form>
       </ModalWrapper>

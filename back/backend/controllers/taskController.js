@@ -27,15 +27,16 @@ const createTask = async (req, res) => {
   }
 };
 
+// Get all tasks
 const getTasks = async (req, res) => {
-    try {
-      const tasks = await Task.find(); // Fetch all tasks from MongoDB
-      console.log("Fetched tasks:", tasks); // Debugging statement
-      res.json(tasks); // Return tasks as JSON
-    } catch (error) {
-      console.error("Error fetching tasks:", error); // More detailed error message
-      res.status(500).json({ message: "Error fetching tasks" });
-    }
-  };
+  try {
+    const tasks = await Task.find(); // Fetch all tasks from MongoDB
+    console.log("Fetched tasks:", tasks); // Debugging statement
+    res.json(tasks); // Return tasks as JSON
+  } catch (error) {
+    console.error("Error fetching tasks:", error); // More detailed error message
+    res.status(500).json({ message: "Error fetching tasks" });
+  }
+};
 
 module.exports = { createTask, getTasks };
